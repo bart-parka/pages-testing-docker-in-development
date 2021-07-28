@@ -1,0 +1,23 @@
+version: "3.9"
+services:
+  webserver:
+    build:
+      dockerfile: Dockerfile
+    image: webserver:test
+    ports:
+      - "80"
+    container_name: compose-web
+  inspec:
+    image: "chef/inspec"
+    container_name: compose-inspec
+    volumes:
+      - type: bind
+        source: ./
+        target: /workdir
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+    working_dir: /workdir
+    depends_on:
+      - "webserver"
+    entrypoint: inspec exec test/default -t docker://compose-web --chef-license accept-silent
